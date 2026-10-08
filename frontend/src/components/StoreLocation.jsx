@@ -2,10 +2,14 @@ import { MapPin, Navigation, MessageCircle } from "lucide-react";
 import { BRAND, waLink } from "@/constants/brand";
 import { Reveal } from "@/components/Reveal";
 import { BusinessHours } from "@/components/BusinessHours";
-import { getMapsConfiguration } from "@/lib/maps";
+
 
 export function StoreLocation() {
-  const { links: maps } = getMapsConfiguration(BRAND.address);
+ const query = encodeURIComponent(BRAND.address);
+  const maps = {
+    embedUrl: "https://www.google.com/maps?q=" + query + "&output=embed",
+    directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=" + query,
+  };
   return (
   <section
     id="localizacao"
