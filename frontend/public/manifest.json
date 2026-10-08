@@ -1,0 +1,13 @@
+{
+  "name": "MG CAR Veículos",
+  "short_name": "MG CAR",
+  "description": "MG CAR Veículos — Vende, Troca, Compra e Financia. Carros em João Pessoa - PB.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "favicon.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "logo-mg-car.png", "sizes": "925x925", "type": "image/png" }
+  ]
+}
