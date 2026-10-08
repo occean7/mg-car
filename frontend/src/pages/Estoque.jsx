@@ -88,7 +88,7 @@ export default function Estoque() {
   useEffect(() => {
     api
       .get("/vehicles")
-      .then((res) => setVehicles(res.data))
+      .then((res) => setVehicles(Array.isArray(res.data) ? res.data : []))
       .catch(() => setError("Não foi possível carregar o estoque agora. Tente novamente em instantes."))
       .finally(() => setLoading(false));
   }, []);
