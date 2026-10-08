@@ -255,14 +255,14 @@ export default function Admin() {
   const [modal, setModal] = useState(null);
 
   useEffect(() => {
-    api.get("/auth/me").then((res) => setAuth(res.data)).catch(() => setAuth(false));
+    api.get("/auth/me").then((res) => setAuth(res.data && res.data.email ? res.data : false)).catch(() => setAuth(false));
   }, []);
 
   const loadVehicles = useCallback(async () => {
     setLoadingList(true);
     try {
       const { data } = await api.get("/vehicles/manage");
-      setVehicles(data);
+      setVehicles(Array.isArray(data) ? data : []);
     } catch {
       toast.error("Não foi possível carregar o estoque.");
     } finally {
