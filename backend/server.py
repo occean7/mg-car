@@ -22,10 +22,25 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 app = FastAPI()
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 api_router = APIRouter(prefix="/api")
 
 JWT_ALGORITHM = "HS256"
 ACCESS_TTL_MIN = 60 * 12
+
+
+@app.get("/", tags=["Saúde"])
+async def health_check():
+    return {"status": "ok", "service": "MG CAR API"}
 
 
 def hash_password(password: str) -> str:
@@ -227,8 +242,11 @@ logger = logging.getLogger(__name__)
 
 
 async def seed_admin():
-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@mgcar.com.br").strip().lower()
-    admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+    admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+    admin_password = os.environ.get("ADMIN_PASSWORD", "")
+    if not admin_email or not admin_password:
+        raise RuntimeError("ADMIN_EMAIL and ADMIN_PASSWORD must be configured")
+
     existing = await db.users.find_one({"email": admin_email})
     if existing is None:
         await db.users.insert_one({
@@ -240,9 +258,6 @@ async def seed_admin():
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
         logger.info("Admin MG CAR criado: %s", admin_email)
-    elif not verify_password(admin_password, existing["password_hash"]):
-        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
-        logger.info("Senha do admin atualizada a partir do .env")
 
 
 @app.on_event("startup")
@@ -256,6 +271,9 @@ async def startup():
     await seed_admin()
     try:
         await init_storage()
+    except KeyError as exc:
+        missing_setting = exc.args[0] if exc.args and isinstance(exc.args[0], str) else "configuração obrigatória"
+        logger.warning("Armazenamento indisponível: configuração %s ausente; nova tentativa no próximo envio.", missing_setting)
     except Exception:
         logger.warning("Armazenamento indisponível na inicialização; nova tentativa no próximo envio.")
 
