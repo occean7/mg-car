@@ -41,6 +41,12 @@ ACCESS_TTL_MIN = 60 * 12
 @app.get("/", tags=["Saúde"])
 async def health_check():
     return {"status": "ok", "service": "MG CAR API"}
+@app.get("/force-seed")
+async def force_seed():
+    admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+    await db.users.delete_one({"email": admin_email})
+    await seed_admin()
+    return {"message": f"Administrador {admin_email} resetado e criado com sucesso no MongoDB!"}
 
 
 def hash_password(password: str) -> str:
