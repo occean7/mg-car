@@ -22,7 +22,15 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 app = FastAPI()
-from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -235,7 +243,6 @@ app.include_router(api_router)
 app.include_router(create_photo_router(db, get_current_user))
 
 origins = [o for o in [os.environ.get("FRONTEND_URL"), "http://localhost:3000"] if o]
-app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
